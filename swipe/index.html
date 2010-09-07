@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+        
+        <title>swipe test</title>
+
+
+        <script src="xui.js" type="application/javascript" charset="utf-8"></script>
+        <script src="xui.swipe.js" type="application/javascript" charset="utf-8"></script>
+		<style type="text/css">
+			body {
+				font: 10px Arial, sans-serif;
+				margin: 0;
+			}
+			#zone-test {
+				position: absolute;
+			    height: 100%;
+				width: 100%;
+				
+				background: #cccc00;
+			}
+ 
+			
+		</style>
+        <script type="text/javascript">
+
+            function init ()
+            {
+                
+ 
+            x$("#zone-test").swipe(
+            function(e, data){
+            	 
+                console.log('doubleTap:'+data.doubleTap+' deltaX:'+data.deltaX+' deltaY:'+data.deltaY+' distance:'+
+                    data.distance+' delay:'+data.delay+' direction:'+data.direction  );
+                    
+                    if (data.doubleTap == true)
+                       x$("#zone-test").bottom('double tap<br />');
+                       
+                    if (data.doubleTap == false)
+                       x$("#zone-test").bottom(data.direction+'<br />');
+                       
+                    
+            }, {
+
+                doubleTapCapture: true,
+                doubleTapMinDelay: 100,
+                doubleTapMaxDelay: 800,
+                swipeMinDelay: 150,
+                swipeMaxDelay: 1000
+
+            }
+            );
+
+
+            }
+
+            var _timer=setInterval(function(){
+                if(/loaded|complete/.test(document.readyState)){
+                    clearInterval(_timer)
+                    init() // call target function
+                }}, 10)
+
+        </script>
+    </head>
+    <body>
+    
+        <div id="zone-test">
+         Swipe example : touch screen … <br />
+         
+         
+            
+        </div>
+    </body>
+</html>

@@ -1,42 +1,36 @@
-/**
- *
- * original code : http://github.com/kanduvisla/iSwipe
- * and from http://github.com/senchalabs/jQTouch
- * 
- *
- */
 
- 
 xui.extend({
 
 
-    swipe : function(callback, opts) {
-        
+    swipe : function(callback, options) {
+
         var defaults = {
             preventDefaultEvents: true,
+            swipeCapture: true,
             swipeMinDistance: 20,
             swipeMaxDistance: 200,
             swipeMinDelay: 50,
             swipeMaxDelay: 1000,
-            doubleTapCapture:false,
+            doubleTapCapture: false,
             doubleTapMinDelay: 50,
-            doubleTapMaxDelay: 1000
-
+            doubleTapMaxDelay: 1000,
+            longTapCapture: false,
+            longTapDelay:1000,
+            simpleTapCapture: false
         };
 
-        var options = {};
-
-        var o = opts ? opts : {};
- 
-
         for ( var key in defaults ){
-            options[key]  = o[key] || defaults[key];
+            if(typeof options[key] == "undefined") options[key] = defaults[key];
         }
- 
+
+        if (options.simpleTapCapture) options.doubleTapCapture = false;
+
         return this.each(function() {
 
-            var startTime = null;
-            var lastTap = 0;
+            var startTime = null,
+            lastTap = 0,
+            longTapTimeOut = null,
+            asLongTap = false;
 
             var originalCoord = {
                 x: 0,
@@ -47,14 +41,56 @@ xui.extend({
                 y: 0
             };
 
-
             function touchStart(e) {
+
+                if ( options.longTapCapture ){
+
+                    window.clearTimeout(longTapTimeOut);
+                    asLongTap = false;
+
+                    longTapTimeOut = window.setTimeout(
+                        function () {
+                            longTapEvent(e)
+                        }
+
+                        , options.longTapDelay);
+                }
+
                 startTime = (new Date).getTime();
                 originalCoord.x = e.targetTouches[0].clientX;
                 originalCoord.y = e.targetTouches[0].clientY;
                 finalCoord.x = 0;
                 finalCoord.y = 0;
+
             }
+
+
+            function longTapEvent(e) {
+
+                asLongTap = true;
+                lastTap = 0;
+                var coords = {};
+
+                coords.type = 'longtap';
+                return callback(e, coords);
+
+            }
+
+
+            function clickTap(e) {
+
+                if (options.longTapCapture)
+                {
+                    window.clearTimeout(longTapTimeOut);
+                }
+                var coords = {};
+
+                coords.type = 'simpletap';
+                return callback(e, coords);
+
+            }
+
+
 
             function touchMove(e) {
 
@@ -62,70 +98,105 @@ xui.extend({
                 {
                     e.preventDefault();
                 }
+
+                if (options.longTapCapture)
+                {
+                    window.clearTimeout(longTapTimeOut);
+                }
+
+
                 finalCoord.x = e.targetTouches[0].clientX;
                 finalCoord.y = e.targetTouches[0].clientY;
- 
+
+
             }
 
             function touchEnd(e) {
- 
+
+                if (options.preventDefaultEvents)
+                {
+                    e.preventDefault();
+                }
+
+                if (options.longTapCapture)
+                {
+                    window.clearTimeout(longTapTimeOut);
+                    if (asLongTap)
+                    {
+                        return false;
+                    }
+                }
+
                 var coords = {};
                 var now = (new Date).getTime();
 
-                
-                
-                if (options.doubleTapCapture == true ) {
+                if ( options.doubleTapCapture ) {
 
                     var delay = now - lastTap;
-                     
+
                     lastTap = now;
 
                     if ( ( delay > options.doubleTapMinDelay ) && ( delay < options.doubleTapMaxDelay)){
                         lastTap = 0;
                         coords.delay = delay;
-                        coords.doubleTap = true;
+                        coords.type = 'doubletap';
                         return callback(e, coords);
                     }
- 
+
                 }
 
-                coords.delay = now - startTime;
-                
-                coords.deltaX = finalCoord.x - originalCoord.x;
-                coords.deltaY = originalCoord.y- finalCoord.y;
-    
-                absX = Math.abs(coords.deltaX);
-                absY = Math.abs(coords.deltaY);
+                if (options.swipeCapture) {
 
-                coords.distance = (absX < absY) ? absY : absX;
+                    coords.delay = now - startTime;
 
-                coords.direction = (absX < absY) ? ( (coords.deltaY < 0) ? 'down' : 'up' ) : ( ( (coords.deltaX < 0) ? 'left' : 'right' ) );
-                
-                if ((finalCoord.x+finalCoord.x) == 0)
-                    return false;
+                    coords.deltaX = finalCoord.x - originalCoord.x;
+                    coords.deltaY = originalCoord.y- finalCoord.y;
 
-                if (coords.distance < options.swipeMinDistance)
-                    return false;
+                    absX = Math.abs(coords.deltaX);
+                    absY = Math.abs(coords.deltaY);
 
-                if (coords.distance > options.swipeMaxDistance)
-                    return false;
+                    coords.distance = (absX < absY) ? absY : absX;
 
-                if (coords.delay < options.swipeMinDelay)
-                    return false;
+                    coords.direction = (absX < absY) ? ( (coords.deltaY < 0) ? 'down' : 'up' ) : ( ( (coords.deltaX < 0) ? 'left' : 'right' ) );
 
-                if (coords.delay > options.swipeMaxDelay)
-                    return false;
+                    if (
+                        ((finalCoord.x+finalCoord.x) != 0)
 
-                lastTap = 0;
-                coords.doubleTap = false;
-                
-                return callback(e, coords);
+
+                        && (coords.distance > options.swipeMinDistance)
+
+
+                        && (coords.distance < options.swipeMaxDistance)
+
+
+                        && (coords.delay > options.swipeMinDelay)
+
+
+                        && (coords.delay < options.swipeMaxDelay)
+                        ) {
+
+                        lastTap = 0;
+
+                        coords.type = 'direction';
+
+                        return callback(e, coords);
+                    }
+                }
+
+                if (options.simpleTapCapture)
+                    clickTap(e)
+
+
+
             }
- 
+
             this.addEventListener("touchstart", touchStart, false);
-            this.addEventListener("touchmove", touchMove, false);
+
+            if (options.swipeCapture)
+                this.addEventListener("touchmove", touchMove, false);
+
             this.addEventListener("touchend", touchEnd, false);
 
         });
     }
-}); 
+});

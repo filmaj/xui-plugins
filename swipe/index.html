@@ -33,27 +33,39 @@
             x$("#zone-test").swipe(
             function(e, data){
             	 
-                console.log('doubleTap:'+data.doubleTap+' deltaX:'+data.deltaX+' deltaY:'+data.deltaY+' distance:'+
+                console.log('type:'+data.type+' deltaX:'+data.deltaX+' deltaY:'+data.deltaY+' distance:'+
                     data.distance+' delay:'+data.delay+' direction:'+data.direction  );
                     
-                    if (data.doubleTap == true)
-                       x$("#zone-test").bottom('double tap<br />');
-                       
-                    if (data.doubleTap == false)
-                       x$("#zone-test").bottom(data.direction+'<br />');
-                       
+                    switch (data.type){
+                    
+                    case ('direction'):
+                       x$("#zone-test").bottom('direction '+data.direction+'<br />');
+                    break;
+                    case ('doubletap'):
+                       x$("#zone-test").bottom('doubletap <br />');
+                    break;
+                    case ('longtap'):
+                       x$("#zone-test").bottom('longtap <br />');
+                    break;
+                    case ('simpletap'):
+                       x$("#zone-test").bottom('simpletap <br />');
+                    break;
+                    	
+                    }	
+                    
                     
             }, {
-
+            	
+                swipeCapture: true,
+                longTapCapture: true,
                 doubleTapCapture: true,
-                doubleTapMinDelay: 100,
-                doubleTapMaxDelay: 800,
-                swipeMinDelay: 150,
-                swipeMaxDelay: 1000
-
+                simpleTapCapture: false
+                 
             }
             );
 
+
+  
 
             }
 
@@ -68,7 +80,7 @@
     <body>
     
         <div id="zone-test">
-         Swipe example : touch screen … <br />
+         Swipe example : touch screen ... <br />
          
          
             

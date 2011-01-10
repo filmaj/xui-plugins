@@ -1,5 +1,0 @@
-DOM Helpers Plug-in for XUI
--------------
-Handy functions to have extended on the XUI object.
- 
-- remove: removes the DOM nodes associated with the XUI object.

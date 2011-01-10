@@ -1,0 +1,6 @@
+This repository will hold various plug-ins for XUI.
+
+How will this repo look? Initial suggestion:
+
+ * each plug-in has its own directory + readme.
+ * simply add a line to a new or existing build profile in xui master repo to include the plug-ins source.js?

@@ -1,3 +1,3 @@
 jQuery Compatibility Plug-In for XUI
 -------------
-Adds functions 'add()' and 'end()', for compatibility with jQuery (?).
+Adds functions `add`, `end`, `show` and `hide`, for compatibility with jQuery.

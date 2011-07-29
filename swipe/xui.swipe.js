@@ -1,10 +1,10 @@
-
 xui.extend({
 
 
     swipe : function(callback, options) {
 
-        var defaults = {
+        var options = options || {}
+        ,   defaults = {
             preventDefaultEvents: true,
             swipeCapture: true,
             swipeMinDistance: 20,
